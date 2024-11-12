@@ -4,34 +4,42 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trading Simulator</title>
+  <!-- Thêm Bootstrap CSS -->
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <style>
+    /* Style tổng thể */
     body {
       font-family: Arial, sans-serif;
-      text-align: center;
       background-color: #f4f4f4;
     }
     .container {
       max-width: 400px;
-      margin: 0 auto;
       padding: 20px;
+      margin-top: 50px;
       background-color: #fff;
-      box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
       border-radius: 10px;
+      text-align: center;
+      animation: fadeIn 1s ease;
     }
-    input[type="number"], input[type="range"] {
-      width: 80%;
-      padding: 8px;
-      margin: 10px 0;
-      font-size: 16px;
+    /* Animation cho container */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
+    /* Style cho nút */
     button {
       padding: 10px 20px;
       font-size: 16px;
-      margin: 5px;
       cursor: pointer;
       border-radius: 5px;
       border: none;
+      transition: transform 0.2s;
     }
+    button:hover {
+      transform: scale(1.05);
+    }
+    /* Nút đặc biệt */
     #betButton {
       background-color: #28a745;
       color: white;
@@ -40,23 +48,43 @@
       background-color: #007bff;
       color: white;
     }
+    /* Style cho input và slider */
+    input[type="number"], input[type="range"] {
+      width: 100%;
+      padding: 8px;
+      margin: 10px 0;
+      font-size: 16px;
+    }
+    /* Text Animation cho kết quả */
+    .result-message {
+      animation: fadeInText 0.8s ease;
+      font-weight: bold;
+    }
+    @keyframes fadeInText {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Trading Simulator</h2>
-    <p id="totalMoney">Tổng số tiền: 100$</p>
-    <input type="number" id="betAmount" placeholder="Nhập số tiền cược" min="1">
-    <button id="betButton">Đặt lệnh</button>
-    <button id="addMoneyButton">Nạp tiền (+50$)</button>
-    <p>
-      Tỷ lệ thắng: <span id="winRateDisplay">50%</span> - 
-      Tỷ lệ tiền thưởng: <span id="winningsMultiplierDisplay">1.84</span>x
+  <div class="container shadow-lg p-3 mb-5 bg-white rounded">
+    <h2 class="text-primary">Trading Simulator</h2>
+    <p id="totalMoney" class="font-weight-bold">Tổng số tiền: 100$</p>
+    <input type="number" class="form-control" id="betAmount" placeholder="Nhập số tiền cược" min="1">
+    <button id="betButton" class="btn btn-success mt-2">Đặt lệnh</button>
+    <button id="addMoneyButton" class="btn btn-primary mt-2">Nạp tiền (+50$)</button>
+    <p class="mt-4">
+      <strong>Tỷ lệ thắng:</strong> <span id="winRateDisplay">50%</span> - 
+      <strong>Tỷ lệ tiền thưởng:</strong> <span id="winningsMultiplierDisplay">1.84</span>x
     </p>
-    <input type="range" id="winRateSlider" min="1" max="100" value="50">
-    <p id="potentialOutcome">Thắng +0$ <-> Thua -0$</p>
-    <p id="resultMessage"></p>
+    <input type="range" id="winRateSlider" min="1" max="100" value="50" class="custom-range">
+    <p id="potentialOutcome" class="text-info mt-2">Thắng +0$ <-> Thua -0$</p>
+    <p id="resultMessage" class="result-message text-danger mt-3"></p>
   </div>
+
+  <!-- Thêm Bootstrap và jQuery -->
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
   <script>
     let totalMoney = 100;
@@ -73,8 +101,8 @@
     function updatePotentialOutcome() {
       const betAmount = parseFloat(document.getElementById("betAmount").value) || 0;
       const winningsMultiplier = calculateWinningsMultiplier(winRate);
-      const potentialWin = betAmount * winningsMultiplier - betAmount; // Số tiền sẽ nhận khi thắng
-      const potentialLoss = betAmount; // Số tiền mất khi thua
+      const potentialWin = betAmount * winningsMultiplier - betAmount;
+      const potentialLoss = betAmount;
       document.getElementById("potentialOutcome").innerText = `Thắng +${potentialWin.toFixed(2)}$ <-> Thua -${potentialLoss}$`;
     }
 
@@ -104,16 +132,15 @@
       totalMoney -= betAmount;
       updateTotalMoney();
 
-      // Xác định thắng/thua
       const isWin = Math.random() * 100 < winRate;
       const winningsMultiplier = calculateWinningsMultiplier(winRate);
 
       if (isWin) {
-        const winnings = betAmount * winningsMultiplier; 
+        const winnings = betAmount * winningsMultiplier;
         totalMoney += winnings;
-        document.getElementById("resultMessage").innerText = `Bạn thắng! Nhận thêm ${winnings.toFixed(2)}$ (tỷ lệ tiền thưởng: ${winningsMultiplier.toFixed(2)}x)`;
+        document.getElementById("resultMessage").innerHTML = `<span class="text-success">Bạn thắng! Nhận thêm ${winnings.toFixed(2)}$ (tỷ lệ tiền thưởng: ${winningsMultiplier.toFixed(2)}x)</span>`;
       } else {
-        document.getElementById("resultMessage").innerText = `Bạn thua! Mất ${betAmount}$`;
+        document.getElementById("resultMessage").innerHTML = `<span class="text-danger">Bạn thua! Mất ${betAmount}$</span>`;
       }
 
       updateTotalMoney();
@@ -122,7 +149,7 @@
     document.getElementById("addMoneyButton").addEventListener("click", () => {
       totalMoney += 50;
       updateTotalMoney();
-      document.getElementById("resultMessage").innerText = "Bạn vừa nạp thêm 50$!";
+      document.getElementById("resultMessage").innerHTML = "<span class='text-info'>Bạn vừa nạp thêm 50$!</span>";
     });
 
     updateTotalMoney();
