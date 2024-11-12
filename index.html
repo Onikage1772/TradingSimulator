@@ -54,34 +54,40 @@
       Tỷ lệ tiền thưởng: <span id="winningsMultiplierDisplay">1.84</span>x
     </p>
     <input type="range" id="winRateSlider" min="1" max="100" value="50">
+    <p id="potentialOutcome">Thắng +0$ <-> Thua -0$</p>
     <p id="resultMessage"></p>
   </div>
 
   <script>
     let totalMoney = 100;
-    let winRate = 50; // Tỷ lệ thắng mặc định là 50%
+    let winRate = 50;
 
-    // Cập nhật hiển thị tổng số tiền
     function updateTotalMoney() {
       document.getElementById("totalMoney").innerText = `Tổng số tiền: ${totalMoney.toFixed(2)}$`;
     }
 
-    // Hàm tính tỷ lệ tiền thưởng dựa trên tỷ lệ thắng
     function calculateWinningsMultiplier(winRate) {
-      return 92 / winRate; // Sử dụng công thức để điều chỉnh tiền thưởng theo tỷ lệ thắng
+      return 92 / winRate;
     }
 
-    // Cập nhật tỷ lệ thắng và tỷ lệ tiền thưởng khi thay đổi thanh trượt
+    function updatePotentialOutcome() {
+      const betAmount = parseFloat(document.getElementById("betAmount").value) || 0;
+      const winningsMultiplier = calculateWinningsMultiplier(winRate);
+      const potentialWin = betAmount * winningsMultiplier - betAmount; // Số tiền sẽ nhận khi thắng
+      const potentialLoss = betAmount; // Số tiền mất khi thua
+      document.getElementById("potentialOutcome").innerText = `Thắng +${potentialWin.toFixed(2)}$ <-> Thua -${potentialLoss}$`;
+    }
+
     document.getElementById("winRateSlider").addEventListener("input", (event) => {
       winRate = parseInt(event.target.value);
       document.getElementById("winRateDisplay").innerText = `${winRate}%`;
-
-      // Tính toán và hiển thị tỷ lệ tiền thưởng
       const winningsMultiplier = calculateWinningsMultiplier(winRate);
       document.getElementById("winningsMultiplierDisplay").innerText = winningsMultiplier.toFixed(2) + "x";
+      updatePotentialOutcome();
     });
 
-    // Hàm đặt cược
+    document.getElementById("betAmount").addEventListener("input", updatePotentialOutcome);
+
     document.getElementById("betButton").addEventListener("click", () => {
       const betAmount = parseFloat(document.getElementById("betAmount").value);
       if (!betAmount || betAmount <= 0) {
@@ -94,31 +100,33 @@
         return;
       }
 
-      // Xác định kết quả thắng/thua dựa trên tỷ lệ thắng từ thanh trượt
+      // Trừ tiền trước khi có kết quả
+      totalMoney -= betAmount;
+      updateTotalMoney();
+
+      // Xác định thắng/thua
       const isWin = Math.random() * 100 < winRate;
-      const winningsMultiplier = calculateWinningsMultiplier(winRate); // Lấy tỷ lệ tiền thưởng
+      const winningsMultiplier = calculateWinningsMultiplier(winRate);
 
       if (isWin) {
-        const winnings = betAmount * winningsMultiplier; // Tính tiền thắng
+        const winnings = betAmount * winningsMultiplier; 
         totalMoney += winnings;
-        document.getElementById("resultMessage").innerText = `Bạn thắng! Được cộng thêm ${winnings.toFixed(2)}$ (tỷ lệ tiền thưởng: ${winningsMultiplier.toFixed(2)}x)`;
+        document.getElementById("resultMessage").innerText = `Bạn thắng! Nhận thêm ${winnings.toFixed(2)}$ (tỷ lệ tiền thưởng: ${winningsMultiplier.toFixed(2)}x)`;
       } else {
-        totalMoney -= betAmount;
         document.getElementById("resultMessage").innerText = `Bạn thua! Mất ${betAmount}$`;
       }
 
       updateTotalMoney();
     });
 
-    // Nút nạp tiền
     document.getElementById("addMoneyButton").addEventListener("click", () => {
       totalMoney += 50;
       updateTotalMoney();
       document.getElementById("resultMessage").innerText = "Bạn vừa nạp thêm 50$!";
     });
 
-    // Khởi tạo số tiền ban đầu
     updateTotalMoney();
+    updatePotentialOutcome();
   </script>
 </body>
 </html>
