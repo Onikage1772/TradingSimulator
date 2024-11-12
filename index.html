@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trading Simulator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f4f4f4;
+    }
+    .container {
+      max-width: 400px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+      border-radius: 10px;
+    }
+    input[type="number"], input[type="range"] {
+      width: 80%;
+      padding: 8px;
+      margin: 10px 0;
+      font-size: 16px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 5px;
+      cursor: pointer;
+      border-radius: 5px;
+      border: none;
+    }
+    #betButton {
+      background-color: #28a745;
+      color: white;
+    }
+    #addMoneyButton {
+      background-color: #007bff;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Trading Simulator</h2>
+    <p id="totalMoney">Tổng số tiền: 100$</p>
+    <input type="number" id="betAmount" placeholder="Nhập số tiền cược" min="1">
+    <button id="betButton">Đặt lệnh</button>
+    <button id="addMoneyButton">Nạp tiền (+50$)</button>
+    <p>
+      Tỷ lệ thắng: <span id="winRateDisplay">50%</span> - 
+      Tỷ lệ tiền thưởng: <span id="winningsMultiplierDisplay">1.84</span>x
+    </p>
+    <input type="range" id="winRateSlider" min="1" max="100" value="50">
+    <p id="resultMessage"></p>
+  </div>
+
+  <script>
+    let totalMoney = 100;
+    let winRate = 50; // Tỷ lệ thắng mặc định là 50%
+
+    // Cập nhật hiển thị tổng số tiền
+    function updateTotalMoney() {
+      document.getElementById("totalMoney").innerText = `Tổng số tiền: ${totalMoney.toFixed(2)}$`;
+    }
+
+    // Hàm tính tỷ lệ tiền thưởng dựa trên tỷ lệ thắng
+    function calculateWinningsMultiplier(winRate) {
+      return 92 / winRate; // Sử dụng công thức để điều chỉnh tiền thưởng theo tỷ lệ thắng
+    }
+
+    // Cập nhật tỷ lệ thắng và tỷ lệ tiền thưởng khi thay đổi thanh trượt
+    document.getElementById("winRateSlider").addEventListener("input", (event) => {
+      winRate = parseInt(event.target.value);
+      document.getElementById("winRateDisplay").innerText = `${winRate}%`;
+
+      // Tính toán và hiển thị tỷ lệ tiền thưởng
+      const winningsMultiplier = calculateWinningsMultiplier(winRate);
+      document.getElementById("winningsMultiplierDisplay").innerText = winningsMultiplier.toFixed(2) + "x";
+    });
+
+    // Hàm đặt cược
+    document.getElementById("betButton").addEventListener("click", () => {
+      const betAmount = parseFloat(document.getElementById("betAmount").value);
+      if (!betAmount || betAmount <= 0) {
+        document.getElementById("resultMessage").innerText = "Vui lòng nhập số tiền cược hợp lệ!";
+        return;
+      }
+
+      if (betAmount > totalMoney) {
+        document.getElementById("resultMessage").innerText = "Số tiền không đủ để đặt cược!";
+        return;
+      }
+
+      // Xác định kết quả thắng/thua dựa trên tỷ lệ thắng từ thanh trượt
+      const isWin = Math.random() * 100 < winRate;
+      const winningsMultiplier = calculateWinningsMultiplier(winRate); // Lấy tỷ lệ tiền thưởng
+
+      if (isWin) {
+        const winnings = betAmount * winningsMultiplier; // Tính tiền thắng
+        totalMoney += winnings;
+        document.getElementById("resultMessage").innerText = `Bạn thắng! Được cộng thêm ${winnings.toFixed(2)}$ (tỷ lệ tiền thưởng: ${winningsMultiplier.toFixed(2)}x)`;
+      } else {
+        totalMoney -= betAmount;
+        document.getElementById("resultMessage").innerText = `Bạn thua! Mất ${betAmount}$`;
+      }
+
+      updateTotalMoney();
+    });
+
+    // Nút nạp tiền
+    document.getElementById("addMoneyButton").addEventListener("click", () => {
+      totalMoney += 50;
+      updateTotalMoney();
+      document.getElementById("resultMessage").innerText = "Bạn vừa nạp thêm 50$!";
+    });
+
+    // Khởi tạo số tiền ban đầu
+    updateTotalMoney();
+  </script>
+</body>
+</html>
